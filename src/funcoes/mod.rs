@@ -160,7 +160,23 @@ pub fn carregar_osm(caminho: impl AsRef<Path>) -> Result<Vec<NoOSM>, Box<dyn std
         .with_prefix("Transformar as áreas");
     for area in lista_de_areas {
         progresso_transformacao.inc(1);
-        let poligono_area = Polygon::new(
+        if let Some(idf) = area
+            .ref_nos()
+            .iter()
+            .find(|&i| nos_coordenadas.contains_key(i))
+        {
+            if let Some(c) = nos_coordenadas.get(idf) {
+                lista_nos_medicina.push(NoOSM::novo(
+                    *area.id(),
+                    area.nome().map(|s| s.clone()),
+                    c.y,
+                    c.x,
+                    Some(true),
+                ));
+            }
+        }
+        //if let Some(c) = nos_coordenadas.iter().find_map(|(i,nc)|)
+        /* let poligono_area = Polygon::new(
             LineString::from_iter(
                 area.ref_nos()
                     .iter()
@@ -176,8 +192,8 @@ pub fn carregar_osm(caminho: impl AsRef<Path>) -> Result<Vec<NoOSM>, Box<dyn std
             centroide.y(),
             centroide.x(),
             Some(area.e_medicina()),
-        );
-        lista_nos_medicina.push(no);
+        );*/
+        //lista_nos_medicina.push(no);
     }
     progresso_transformacao.finish_with_message("Transformações encerradas");
     Ok(lista_nos_medicina)
