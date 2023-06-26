@@ -1,0 +1,12 @@
+[package]
+name = "locate_osm_feature"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+geo = "0.25.0"
+indicatif = "0.17.5"
+quick-xml = "0.29.0"
+wkt = "0.10.3"
