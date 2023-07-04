@@ -22,7 +22,7 @@ impl FeatureOSM {
             match self {
                 FeatureOSM::No(no) => no.informar_nome(valor),
                 FeatureOSM::Area(area) => area.informar_nome(valor),
-                FeatureOSM::Undefined => {},
+                FeatureOSM::Undefined => {}
             }
         } else {
             let setar_medicina = match chave.as_str() {
@@ -98,7 +98,13 @@ impl NoOSM {
 }
 impl Display for NoOSM {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{};{};{}", self.name.as_ref().unwrap_or(&String::from("")), self.coordenada.to_wkt(), self.id)
+        write!(
+            f,
+            "{};{};{}",
+            self.name.as_ref().unwrap_or(&String::from("")),
+            self.coordenada.to_wkt(),
+            self.id
+        )
     }
 }
 #[derive(Debug, Default, Clone)]

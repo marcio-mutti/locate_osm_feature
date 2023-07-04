@@ -12,23 +12,58 @@ use quick_xml::{events::Event, Reader};
 use crate::tipos::{AreaOSM, FeatureOSM, NoOSM};
 
 pub fn carregar_osm(caminho: impl AsRef<Path>) -> Result<Vec<NoOSM>, Box<dyn std::error::Error>> {
-    let mut arq_osm = std::fs::File::open(caminho.as_ref())?;
-    arq_osm.seek(std::io::SeekFrom::End(0))?;
-    let tamanho = arq_osm.stream_position()?;
-    arq_osm.seek(std::io::SeekFrom::Start(0))?;
+    let mut tamanho: u64 = Default::default();
+
     let estilo_barra = ProgressStyle::with_template(
         "{prefix} [{elapsed_precise}] {bar:40.cyan/blue} [{eta_precise}] [{msg}]",
     )?
     .progress_chars("█▇▆▅▄▃▂▁  ");
+    let mut n_tags: usize = Default::default();
+    let mut buffer_xml = Vec::new();
+    {
+        let mut arq_osm = std::fs::File::open(caminho.as_ref())?;
+        arq_osm.seek(std::io::SeekFrom::End(0))?;
+        tamanho = arq_osm.stream_position()?;
+        arq_osm.seek(std::io::SeekFrom::Start(0))?;
+        let arq_osm = BufReader::new(arq_osm);
+        let mut arq_xml = Reader::from_reader(arq_osm);
+        let leitor = arq_xml.expand_empty_elements(true);
+        let progresso_leitura_inicial = ProgressBar::new(tamanho)
+            .with_style(estilo_barra.clone())
+            .with_prefix("Calcaulando o tamanho total.");
+        loop {
+            progresso_leitura_inicial.set_position(leitor.buffer_position() as u64);
+            match leitor.read_event_into(&mut buffer_xml) {
+                Ok(evento) => match evento {
+                    Event::Start(elemento) => match elemento.as_ref() {
+                        b"tag" => {
+                            n_tags += 1;
+                        }
+                        _ => {}
+                    },
+                    Event::Eof => break,
+                    _ => {}
+                },
+                Err(e) => panic!(
+                    "Erro ao lero arquivo OSM na posicao {}.\n{:#?}",
+                    leitor.buffer_position(),
+                    e
+                ),
+            }
+        }
+        progresso_leitura_inicial.finish_with_message("Leitura Inicial Completa.");
+    }
+    let arq_osm = std::fs::File::open(caminho.as_ref())?;
+    let arq_osm = BufReader::new(arq_osm);
     let progresso = indicatif::ProgressBar::new(tamanho)
         .with_style(estilo_barra.clone())
         .with_prefix("Carga OSM");
-    let arq_osm = BufReader::new(arq_osm);
+    //let mut arq_osm = std::fs::File::open(caminho.as_ref())?;
     let mut arq_xml = Reader::from_reader(arq_osm);
     let mut buffer_xml = Vec::new();
     let mut lista_nos_medicina: Vec<NoOSM> = Vec::new();
     let mut lista_de_areas: Vec<AreaOSM> = Vec::new();
-    let mut nos_coordenadas: HashMap<i64, Coord<f64>> = HashMap::new();
+    let mut nos_coordenadas: HashMap<i64, Coord<f64>> = HashMap::with_capacity(n_tags);
     {
         let leitor = arq_xml.expand_empty_elements(true);
         let mut elemento_atual: FeatureOSM = Default::default();
