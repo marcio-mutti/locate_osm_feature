@@ -3,9 +3,11 @@ use std::fmt::Display;
 use geo::{Coord, Point};
 use wkt::ToWkt;
 
+#[derive(Default)]
 pub enum FeatureOSM {
     No(NoOSM),
     Area(AreaOSM),
+    #[default]
     Undefined,
 }
 
@@ -27,11 +29,7 @@ impl FeatureOSM {
         } else {
             let setar_medicina = match chave.as_str() {
                 "healthcare" => true,
-                "amenity" => match valor.as_str() {
-                    "clinic" | "doctors" | "nursing_home" | "hospital" | "pharmacy"
-                    | "social_facility" => true,
-                    _ => false,
-                },
+                "amenity" => matches!(valor.as_str(),"clinic" | "doctors" | "nursing_home" | "hospital" | "pharmacy" | "social_facility"),
                 _ => false,
             };
             if setar_medicina {
@@ -42,11 +40,6 @@ impl FeatureOSM {
                 }
             }
         }
-    }
-}
-impl Default for FeatureOSM {
-    fn default() -> Self {
-        FeatureOSM::Undefined
     }
 }
 

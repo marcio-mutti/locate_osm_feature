@@ -8,5 +8,5 @@ edition = "2021"
 [dependencies]
 geo = "0.25.0"
 indicatif = "0.17.5"
-quick-xml = "0.29.0"
 wkt = "0.10.3"
+xml-rs = "0.8.15"
