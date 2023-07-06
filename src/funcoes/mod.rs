@@ -105,16 +105,17 @@ pub fn carregar_osm(caminho: impl AsRef<Path>) -> Result<Vec<NoOSM>, Box<dyn std
                                 true => match elemento_atual {
                                     FeatureOSM::No(no) => lista_nos_medicina.push(no),
                                     FeatureOSM::Area(area) => lista_de_areas.push(area),
-                                    FeatureOSM::Undefined => {}
+                                    FeatureOSM::Indefinido => {}
                                 },
                                 false => if let FeatureOSM::No(ref no) = elemento_atual {
                                         nos_coordenadas.insert(no.id(), no.coordenada());
                                     },
                             }
+                            elemento_atual = Default::default();
                         }
                         _ => {}
                     }
-                    elemento_atual = Default::default();
+                    
                 },
                 _ => {}
             },

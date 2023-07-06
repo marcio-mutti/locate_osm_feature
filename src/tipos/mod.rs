@@ -3,12 +3,12 @@ use std::fmt::Display;
 use geo::{Coord, Point};
 use wkt::ToWkt;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub enum FeatureOSM {
     No(NoOSM),
     Area(AreaOSM),
     #[default]
-    Undefined,
+    Indefinido,
 }
 
 impl FeatureOSM {
@@ -16,7 +16,7 @@ impl FeatureOSM {
         match self {
             FeatureOSM::No(ref no) => no.e_medicina(),
             FeatureOSM::Area(ref area) => area.e_medicina(),
-            FeatureOSM::Undefined => false,
+            FeatureOSM::Indefinido => false,
         }
     }
     pub fn add_tag(&mut self, chave: String, valor: String) {
@@ -24,7 +24,7 @@ impl FeatureOSM {
             match self {
                 FeatureOSM::No(no) => no.informar_nome(valor),
                 FeatureOSM::Area(area) => area.informar_nome(valor),
-                FeatureOSM::Undefined => {}
+                FeatureOSM::Indefinido => {}
             }
         } else {
             let setar_medicina = match chave.as_str() {
@@ -36,7 +36,7 @@ impl FeatureOSM {
                 match self {
                     FeatureOSM::No(node) => node.confirmar_medicina(),
                     FeatureOSM::Area(area) => area.confirmar_medicina(),
-                    FeatureOSM::Undefined => {}
+                    FeatureOSM::Indefinido => {}
                 }
             }
         }
